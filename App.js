@@ -5,7 +5,9 @@ import {
   ScrollView,
   View,
   Text,
-  StatusBar
+  StatusBar,
+  FlatList,
+  Item
 } from 'react-native';
 import BeaconBroadcast from 'react-native-ibeacon-simulator';
 import { DeviceEventEmitter } from 'react-native'
@@ -23,7 +25,8 @@ export default class App extends Component {
     constructor(props){
         super(props);
         this.state = {
-            state: false
+            state: false,
+            beacons: []
         }
         let me = this;
         BeaconBroadcast.checkTransmissionSupported()
@@ -59,8 +62,15 @@ export default class App extends Component {
                 (data) => {
                     if(data.beacons.length){
                         data.beacons.forEach(b => {
-                            console.log(b.distance)
+                            // console.log(b.uuid b.distance)
+                            if(!me.state.beacons.filter(bc => bc.uuid == b.uuid).length){
+                                let beacons = this.state.beacons;
+                                b.key = b.uuid;
+                                beacons.push(b);
+                                this.setState({beacons: beacons});
+                            }
                         })
+                        console.log(this.state.beacons)
                     }
                 }
                 // this.beaconsRSSI = bc;
@@ -69,11 +79,26 @@ export default class App extends Component {
     }
     render(){
         let working = this.state.state;
+        let beacons = this.state.beacons;
+        console.log('render', this.state.beacons)
         return (    
             <View style={styles.page}>
                 <Text style={[styles.text, {color: working ? 'green' : 'red'}]} >{working ? 'i\'m working :)' : 'not working :(\ncheck bluetooth connection, if enabled i cannot simulate ibeacon behaviour'}</Text>
                 <View>
                     <Text>List of beacon around</Text>
+                </View>
+                <View style={styles.list}>
+                    <FlatList
+                        style={{flex: 1, marginLeft: 10, marginRight: 10}}
+                        data={this.state.beacons}
+                        renderItem={({ item }) => (
+                            <View style={styles.beacon} key={item.key}>
+                                <View style={styles.beaconParam}><Text style={styles.beaconParamText}>{item.minor}</Text></View>
+                                <View style={styles.beaconParam}><Text style={styles.beaconParamText}>{item.distance.toFixed(2)}</Text></View>
+                                <View style={styles.beaconParam}><Text style={styles.beaconParamText}>{item.rssi.toFixed(2)}</Text></View>
+                            </View>
+                        )}
+                    />
                 </View>
             </View>
         );
@@ -84,11 +109,29 @@ const styles = StyleSheet.create({
     page: {
         backgroundColor: 'white',
         flex: 1,
+        flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center'
     },
     text: {
         fontSize: 30
+    },
+    list: {
+        flex: 1,
+        width: '100%',
+        flexDirection: 'column',
+        height: 100
+    },
+    beacon: {
+        flex:1,
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+    },
+    beaconParam: {
+        flex:1
+    },
+    beaconParamText: {
+        textAlign: 'center'
     }
 }); 
 
