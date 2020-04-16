@@ -7,8 +7,11 @@ import {
   Text,
   StatusBar,
   FlatList,
-  Item
+  Item,
+  TextInput,
+  TouchableOpacity
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import BeaconBroadcast from 'react-native-ibeacon-simulator';
 import { DeviceEventEmitter } from 'react-native'
 import Beacons from 'react-native-beacons-manager'
@@ -26,15 +29,61 @@ export default class App extends Component {
         super(props);
         this.state = {
             state: false,
-            beacons: []
+            beacons: [],
+            params: [
+                {name: "frequency", value: 10},
+                {name: "minor", value: 300},
+                {name: "major", value: 301},
+                {name: "id", value: '248'},
+                {name: "power", value: 'HIGH'}
+            ],
+            uuid: 'eb8c7d67-58b0-4ff7-a5e2-32f2f5bcb36d'
         }
+        this._storeData = async (label, value) => {
+            try {
+                await AsyncStorage.setItem(label, value);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        this._getData = async label => {
+            try {
+                return await AsyncStorage.getItem(label);
+            } catch (error) {
+                console.log(error);
+            }
+        };
         let me = this;
+        var arr = [];
+        this.state.params.forEach((p, i) => {
+            me._getData(p.name).then(res => {
+                // if(res !== null){
+                    arr.push({name: p.name, value: (res == null ? me.state.params.filter(par => par.name == p.name)[0].value : res)})
+                // }
+                if(i == me.state.params.length - 1) {
+                    me.setState({params: arr});
+                    console.log(this.state.params)
+                }
+            })
+        })
         BeaconBroadcast.checkTransmissionSupported()
             .then(() => {
                 console.log('inside')
                 me.setState({state: true})
-              BeaconBroadcast.stopAdvertisingBeacon()
-              BeaconBroadcast.startAdvertisingBeaconWithString('eb8c7d67-58b0-4ff7-a5e2-32f2f5bcb36c', '228', 300, 301)
+                BeaconBroadcast.stopAdvertisingBeacon()
+                let id = this.state.params.filter(p => p.name == 'id')[0].value;
+                let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
+                let major = this.state.params.filter(p => p.name == 'major')[0].value;
+                let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
+                let power = this.state.params.filter(p => p.name == 'power')[0].value;
+                BeaconBroadcast.startAdvertisingBeaconWithString(
+                    this.state.uuid, 
+                    id,
+                    parseInt(minor), 
+                    parseInt(major), 
+                    parseInt(frequency), 
+                    power
+                )
               // BeaconBroadcast.startAdvertisingBeaconWithString('2bc54024-6487-11ea-bc55-0242ac130003', '128', 200, 201)
             })
             .catch((e) => {
@@ -70,21 +119,131 @@ export default class App extends Component {
                                 this.setState({beacons: beacons});
                             }
                         })
-                        console.log(this.state.beacons)
+                        console.log(data.beacons)
                     }
                 }
                 // this.beaconsRSSI = bc;
             );
         }, 3000)
     }
+
+    restartIbeacon(){
+        let me = this;
+        BeaconBroadcast.stopAdvertisingBeacon();
+        BeaconBroadcast.checkTransmissionSupported()
+            .then(() => {
+                console.log('inside')
+                me.setState({state: true})
+                BeaconBroadcast.stopAdvertisingBeacon()
+                let id = this.state.params.filter(p => p.name == 'id')[0].value;
+                let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
+                let major = this.state.params.filter(p => p.name == 'major')[0].value;
+                let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
+                let power = this.state.params.filter(p => p.name == 'power')[0].value;
+                BeaconBroadcast.startAdvertisingBeaconWithString(
+                    this.state.uuid, 
+                    id,
+                    parseInt(minor), 
+                    parseInt(major), 
+                    parseInt(frequency), 
+                    power
+                )
+              // BeaconBroadcast.startAdvertisingBeaconWithString('2bc54024-6487-11ea-bc55-0242ac130003', '128', 200, 201)
+            })
+            .catch((e) => {
+                console.log('error', e)
+              /* handle return errors */
+              // - NOT_SUPPORTED_MIN_SDK
+              // - NOT_SUPPORTED_BLE
+              // - DEPRECATED_NOT_SUPPORTED_MULTIPLE_ADVERTISEMENTS
+              // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER
+              // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER_MULTIPLE_ADVERTISEMENTS
+            })
+        
+        this.state.params.forEach(el => {
+            this._storeData(el.name, el.value.toString());
+        })
+    }
     render(){
         let working = this.state.state;
         let beacons = this.state.beacons;
-        console.log('render', this.state.beacons)
+        let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
+        let major = this.state.params.filter(p => p.name == 'major')[0].value;
+        let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
+        let power = this.state.params.filter(p => p.name == 'power')[0].value;
+        console.log('render', minor, major, frequency, power)
         return (    
             <View style={styles.page}>
                 <Text style={[styles.text, {color: working ? 'green' : 'red'}]} >{working ? 'i\'m working :)' : 'not working :(\ncheck bluetooth connection, if enabled i cannot simulate ibeacon behaviour'}</Text>
-                <View>
+                <View style={styles.inputCont}>
+                    <View style={styles.inputLabel}><Text>minor</Text></View>
+                    <TextInput style={styles.input} 
+                        value={minor.toString()}
+                        onChangeText={t => {
+                            let arr = this.state.params.filter(p => p.name != 'minor');
+                            arr.push({name: 'minor', value: t})
+                            this.setState({params: arr});
+                        }}>
+                    </TextInput>
+                    <TouchableOpacity style={styles.button}
+                        onPress={()=>{
+                            this.restartIbeacon();
+                        }}>
+                        <Text style={styles.buttonText}>set</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.inputCont}>
+                    <View style={styles.inputLabel}><Text>major</Text></View>
+                    <TextInput style={styles.input} 
+                        value={major.toString()}
+                        onChangeText={t => {
+                            let arr = this.state.params.filter(p => p.name != 'major');
+                            arr.push({name: 'major', value: t})
+                            this.setState({params: arr});
+                        }}>
+                    </TextInput>
+                    <TouchableOpacity style={styles.button}
+                        onPress={()=>{
+                            this.restartIbeacon();
+                        }}>
+                        <Text style={styles.buttonText}>set</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.inputCont}>
+                    <View style={styles.inputLabel}><Text>frequency</Text></View>
+                    <TextInput style={styles.input} 
+                        value={frequency.toString()}
+                        onChangeText={t => {
+                            let arr = this.state.params.filter(p => p.name != 'frequency');
+                            arr.push({name: 'frequency', value: t})
+                            this.setState({params: arr});
+                        }}>
+                    </TextInput>
+                    <TouchableOpacity style={styles.button}
+                        onPress={()=>{
+                            this.restartIbeacon();
+                        }}>
+                        <Text style={styles.buttonText}>set</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.inputCont}>
+                    <View style={styles.inputLabel}><Text>power</Text></View>
+                    <TextInput style={styles.input} 
+                        value={power.toString()}
+                        onChangeText={t => {
+                            let arr = this.state.params.filter(p => p.name != 'power');
+                            arr.push({name: 'power', value: t})
+                            this.setState({params: arr});
+                        }}>
+                    </TextInput>
+                    <TouchableOpacity style={styles.button}
+                        onPress={()=>{
+                            this.restartIbeacon();
+                        }}>
+                        <Text style={styles.buttonText}>set</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.beaconListText}>
                     <Text>List of beacon around</Text>
                 </View>
                 <View style={styles.list}>
@@ -117,7 +276,7 @@ const styles = StyleSheet.create({
         fontSize: 30
     },
     list: {
-        flex: 1,
+        flex: 4,
         width: '100%',
         flexDirection: 'column',
         height: 100
@@ -132,6 +291,34 @@ const styles = StyleSheet.create({
     },
     beaconParamText: {
         textAlign: 'center'
+    },
+    buttonText: {
+        textAlign: 'center'
+    },
+    inputCont: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        flex: 1,
+        lineHeight: 30,
+        marginLeft: 5,
+        marginRight: 5,
+    },
+    input: {
+        flex: 3,
+        borderWidth: 2,
+        width: 70,
+        height: 40,
+        marginLeft: 5
+    },
+    inputLabel: {
+        flex: 1
+    },
+    button: {
+        height: 30,
+        width: 60,
+        borderWidth: 2,
+        borderRadius: 7,
+        backgroundColor: '#ccc'
     }
 }); 
 

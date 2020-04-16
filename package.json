@@ -10,11 +10,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-community/async-storage": "^1.9.0",
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-beacons-manager": "^1.0.7",
     "react-native-bluetooth-state": "^2.0.0",
-    "react-native-ibeacon-simulator": "^1.0.10",
+    "react-native-ibeacon-simulator": "git+https://github.com/Phasor1/react-native-ibeacon-simulator.git",
     "react-native-vector-icons": "^6.6.0",
     "typescript": "^3.8.3"
   },
