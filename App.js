@@ -22,6 +22,7 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import _ from 'lodash';
 
 
 export default class App extends Component {
@@ -35,9 +36,10 @@ export default class App extends Component {
                 {name: "minor", value: 300},
                 {name: "major", value: 301},
                 {name: "id", value: '248'},
-                {name: "power", value: 'HIGH'}
+                {name: "power", value: 'HIGH'},
+                {name: "uuid", value: '12345678-3a15-3a15-3a15-123456789abc'}
             ],
-            uuid: 'eb8c7d67-58b0-4ff7-a5e2-32f2f5bcb36d'
+            uuid: '12345678-3a15-3a15-3a15-123456789abc'
         }
         this._storeData = async (label, value) => {
             try {
@@ -63,21 +65,20 @@ export default class App extends Component {
                 if(i == me.state.params.length - 1) {
                     me.setState({params: arr});
                     console.log(this.state.params)
-                }
-            })
-        })
-        BeaconBroadcast.checkTransmissionSupported()
+                    BeaconBroadcast.checkTransmissionSupported()
             .then(() => {
                 console.log('inside')
                 me.setState({state: true})
                 BeaconBroadcast.stopAdvertisingBeacon()
+                var uuid = this.state.params.filter(p => p.name == 'uuid')[0].value;
                 let id = this.state.params.filter(p => p.name == 'id')[0].value;
                 let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
                 let major = this.state.params.filter(p => p.name == 'major')[0].value;
                 let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
                 let power = this.state.params.filter(p => p.name == 'power')[0].value;
+                console.log(uuid)
                 BeaconBroadcast.startAdvertisingBeaconWithString(
-                    this.state.uuid, 
+                    uuid, 
                     id,
                     parseInt(minor), 
                     parseInt(major), 
@@ -95,6 +96,9 @@ export default class App extends Component {
               // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER
               // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER_MULTIPLE_ADVERTISEMENTS
             })
+                }
+            })
+        })
 
         Beacons.detectCustomBeaconLayout('m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24')
         Beacons.detectIBeacons();
@@ -135,13 +139,14 @@ export default class App extends Component {
                 console.log('inside')
                 me.setState({state: true})
                 BeaconBroadcast.stopAdvertisingBeacon()
+                let uuid = this.state.params.filter(p => p.name == 'uuid')[0].value;
                 let id = this.state.params.filter(p => p.name == 'id')[0].value;
                 let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
                 let major = this.state.params.filter(p => p.name == 'major')[0].value;
                 let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
                 let power = this.state.params.filter(p => p.name == 'power')[0].value;
                 BeaconBroadcast.startAdvertisingBeaconWithString(
-                    this.state.uuid, 
+                    uuid, 
                     id,
                     parseInt(minor), 
                     parseInt(major), 
@@ -175,74 +180,28 @@ export default class App extends Component {
         return (    
             <View style={styles.page}>
                 <Text style={[styles.text, {color: working ? 'green' : 'red'}]} >{working ? 'i\'m working :)' : 'not working :(\ncheck bluetooth connection, if enabled i cannot simulate ibeacon behaviour'}</Text>
-                <View style={styles.inputCont}>
-                    <View style={styles.inputLabel}><Text>minor</Text></View>
-                    <TextInput style={styles.input} 
-                        value={minor.toString()}
-                        onChangeText={t => {
-                            let arr = this.state.params.filter(p => p.name != 'minor');
-                            arr.push({name: 'minor', value: t})
-                            this.setState({params: arr});
-                        }}>
-                    </TextInput>
-                    <TouchableOpacity style={styles.button}
-                        onPress={()=>{
-                            this.restartIbeacon();
-                        }}>
-                        <Text style={styles.buttonText}>set</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.inputCont}>
-                    <View style={styles.inputLabel}><Text>major</Text></View>
-                    <TextInput style={styles.input} 
-                        value={major.toString()}
-                        onChangeText={t => {
-                            let arr = this.state.params.filter(p => p.name != 'major');
-                            arr.push({name: 'major', value: t})
-                            this.setState({params: arr});
-                        }}>
-                    </TextInput>
-                    <TouchableOpacity style={styles.button}
-                        onPress={()=>{
-                            this.restartIbeacon();
-                        }}>
-                        <Text style={styles.buttonText}>set</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.inputCont}>
-                    <View style={styles.inputLabel}><Text>frequency</Text></View>
-                    <TextInput style={styles.input} 
-                        value={frequency.toString()}
-                        onChangeText={t => {
-                            let arr = this.state.params.filter(p => p.name != 'frequency');
-                            arr.push({name: 'frequency', value: t})
-                            this.setState({params: arr});
-                        }}>
-                    </TextInput>
-                    <TouchableOpacity style={styles.button}
-                        onPress={()=>{
-                            this.restartIbeacon();
-                        }}>
-                        <Text style={styles.buttonText}>set</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.inputCont}>
-                    <View style={styles.inputLabel}><Text>power</Text></View>
-                    <TextInput style={styles.input} 
-                        value={power.toString()}
-                        onChangeText={t => {
-                            let arr = this.state.params.filter(p => p.name != 'power');
-                            arr.push({name: 'power', value: t})
-                            this.setState({params: arr});
-                        }}>
-                    </TextInput>
-                    <TouchableOpacity style={styles.button}
-                        onPress={()=>{
-                            this.restartIbeacon();
-                        }}>
-                        <Text style={styles.buttonText}>set</Text>
-                    </TouchableOpacity>
-                </View>
+                {
+                    this.state.params.map((el, i) => (
+                        <View style={styles.inputCont} key={i}>
+                            <View style={styles.inputLabel}><Text>{el.name}</Text></View>
+                            <TextInput style={styles.input} 
+                                value={el.value.toString()}
+                                onChangeText={t => {
+                                    let arr = _.cloneDeep(this.state.params);
+                                    arr.filter(p => p.name == el.name)[0].value = t
+                                    // arr.push({name: el.name, value: t})
+                                    this.setState({params: arr});
+                                }}>
+                            </TextInput>
+                            <TouchableOpacity style={styles.button}
+                                onPress={()=>{
+                                    this.restartIbeacon();
+                                }}>
+                                <Text style={styles.buttonText}>set</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))
+                }
                 <View style={styles.beaconListText}>
                     <Text>List of beacon around</Text>
                 </View>
