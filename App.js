@@ -80,8 +80,8 @@ export default class App extends Component {
                 BeaconBroadcast.startAdvertisingBeaconWithString(
                     uuid, 
                     id,
-                    parseInt(minor), 
                     parseInt(major), 
+                    parseInt(minor), 
                     parseInt(frequency), 
                     power
                 )
@@ -148,8 +148,8 @@ export default class App extends Component {
                 BeaconBroadcast.startAdvertisingBeaconWithString(
                     uuid, 
                     id,
-                    parseInt(minor), 
                     parseInt(major), 
+                    parseInt(minor), 
                     parseInt(frequency), 
                     power
                 )
