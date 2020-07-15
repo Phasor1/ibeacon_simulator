@@ -181,8 +181,6 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-ibeacon-simulator')
-    implementation project(':react-native-beacons-manager')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
 

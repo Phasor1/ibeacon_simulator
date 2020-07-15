@@ -14,7 +14,7 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import BeaconBroadcast from 'react-native-ibeacon-simulator';
 import { DeviceEventEmitter } from 'react-native'
-import Beacons from 'react-native-beacons-manager'
+// import Beacons from 'react-native-beacons-manager'
 import {
   Header,
   LearnMoreLinks,
@@ -33,8 +33,8 @@ export default class App extends Component {
             beacons: [],
             params: [
                 {name: "frequency", value: 10},
-                {name: "minor", value: 300},
                 {name: "major", value: 301},
+                {name: "minor", value: 300},
                 {name: "id", value: '248'},
                 {name: "power", value: 'HIGH'},
                 {name: "uuid", value: '12345678-3a15-3a15-3a15-123456789abc'}
@@ -66,69 +66,69 @@ export default class App extends Component {
                     me.setState({params: arr});
                     console.log(this.state.params)
                     BeaconBroadcast.checkTransmissionSupported()
-            .then(() => {
-                console.log('inside')
-                me.setState({state: true})
-                BeaconBroadcast.stopAdvertisingBeacon()
-                var uuid = this.state.params.filter(p => p.name == 'uuid')[0].value;
-                let id = this.state.params.filter(p => p.name == 'id')[0].value;
-                let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
-                let major = this.state.params.filter(p => p.name == 'major')[0].value;
-                let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
-                let power = this.state.params.filter(p => p.name == 'power')[0].value;
-                console.log(uuid)
-                BeaconBroadcast.startAdvertisingBeaconWithString(
-                    uuid, 
-                    id,
-                    parseInt(major), 
-                    parseInt(minor), 
-                    parseInt(frequency), 
-                    power
-                )
-              // BeaconBroadcast.startAdvertisingBeaconWithString('2bc54024-6487-11ea-bc55-0242ac130003', '128', 200, 201)
-            })
-            .catch((e) => {
-                console.log('error', e)
-              /* handle return errors */
-              // - NOT_SUPPORTED_MIN_SDK
-              // - NOT_SUPPORTED_BLE
-              // - DEPRECATED_NOT_SUPPORTED_MULTIPLE_ADVERTISEMENTS
-              // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER
-              // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER_MULTIPLE_ADVERTISEMENTS
-            })
+                    .then(() => {
+                        console.log('inside')
+                        me.setState({state: true})
+                        BeaconBroadcast.stopAdvertisingBeacon()
+                        var uuid = this.state.params.filter(p => p.name == 'uuid')[0].value;
+                        let id = this.state.params.filter(p => p.name == 'id')[0].value;
+                        let minor = this.state.params.filter(p => p.name == 'minor')[0].value;
+                        let major = this.state.params.filter(p => p.name == 'major')[0].value;
+                        let frequency = this.state.params.filter(p => p.name == 'frequency')[0].value;
+                        let power = this.state.params.filter(p => p.name == 'power')[0].value;
+                        console.log(uuid)
+                        BeaconBroadcast.startAdvertisingBeaconWithString(
+                            uuid, 
+                            id,
+                            parseInt(major), 
+                            parseInt(minor), 
+                            parseInt(frequency), 
+                            power
+                        )
+                      // BeaconBroadcast.startAdvertisingBeaconWithString('2bc54024-6487-11ea-bc55-0242ac130003', '128', 200, 201)
+                    })
+                    .catch((e) => {
+                        console.log('error', e)
+                      /* handle return errors */
+                      // - NOT_SUPPORTED_MIN_SDK
+                      // - NOT_SUPPORTED_BLE
+                      // - DEPRECATED_NOT_SUPPORTED_MULTIPLE_ADVERTISEMENTS
+                      // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER
+                      // - NOT_SUPPORTED_CANNOT_GET_ADVERTISER_MULTIPLE_ADVERTISEMENTS
+                    })
                 }
             })
         })
 
-        Beacons.detectCustomBeaconLayout('m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24')
-        Beacons.detectIBeacons();
-        // Range beacons inside the region
-        Beacons
-            .startRangingBeaconsInRegion("REGION1") // or like  < v1.0.7: .startRangingBeaconsInRegion(identifier, uuid)
-            .then(() => console.log('Beacons ranging started succesfully'))
-            .catch(error => console.log(`Beacons ranging not started, error: ${error}`));
+        // Beacons.detectCustomBeaconLayout('m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24')
+        // Beacons.detectIBeacons();
+        // // Range beacons inside the region
+        // Beacons
+        //     .startRangingBeaconsInRegion("REGION1") // or like  < v1.0.7: .startRangingBeaconsInRegion(identifier, uuid)
+        //     .then(() => console.log('Beacons ranging started succesfully'))
+        //     .catch(error => console.log(`Beacons ranging not started, error: ${error}`));
 
-        Beacons.setRssiFilter(Beacons.ARMA_RSSI_FILTER, 1.0);
-        setTimeout(() =>{
-            me.beaconsDidRangeEvent = DeviceEventEmitter.addListener(
-                'beaconsDidRange',
-                (data) => {
-                    if(data.beacons.length){
-                        data.beacons.forEach(b => {
-                            // console.log(b.uuid b.distance)
-                            if(!me.state.beacons.filter(bc => bc.uuid == b.uuid).length){
-                                let beacons = this.state.beacons;
-                                b.key = b.uuid;
-                                beacons.push(b);
-                                this.setState({beacons: beacons});
-                            }
-                        })
-                        console.log(data.beacons)
-                    }
-                }
-                // this.beaconsRSSI = bc;
-            );
-        }, 3000)
+        // Beacons.setRssiFilter(Beacons.ARMA_RSSI_FILTER, 1.0);
+        // setTimeout(() =>{
+        //     me.beaconsDidRangeEvent = DeviceEventEmitter.addListener(
+        //         'beaconsDidRange',
+        //         (data) => {
+        //             if(data.beacons.length){
+        //                 data.beacons.forEach(b => {
+        //                     // console.log(b.uuid b.distance)
+        //                     if(!me.state.beacons.filter(bc => bc.uuid == b.uuid).length){
+        //                         let beacons = this.state.beacons;
+        //                         b.key = b.uuid;
+        //                         beacons.push(b);
+        //                         this.setState({beacons: beacons});
+        //                     }
+        //                 })
+        //                 console.log(data.beacons)
+        //             }
+        //         }
+        //         // this.beaconsRSSI = bc;
+        //     );
+        // }, 3000)
     }
 
     restartIbeacon(){
